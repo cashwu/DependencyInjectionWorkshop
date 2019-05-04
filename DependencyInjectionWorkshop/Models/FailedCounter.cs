@@ -1,7 +1,6 @@
 using System;
 using System.Net.Http;
 using System.Threading.Tasks;
-using DependencyInjectionWorkshop.Exceptions;
 using DependencyInjectionWorkshop.Models;
 
 public class FailedCounter : IFailedCounter

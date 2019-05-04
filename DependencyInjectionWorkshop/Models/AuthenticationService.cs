@@ -8,34 +8,34 @@ namespace DependencyInjectionWorkshop.Models
         private readonly IFailedCounter _failedCounter;
         private readonly IProfile _profile;
         private readonly IHash _hash;
-        private readonly IOpt _optService;
+        private readonly IOtp _otpService;
         private readonly ILogger _logger;
         private readonly INotification _notification;
 
         public AuthenticationService(IFailedCounter failedCounter,
                                      IProfile profile,
                                      IHash hash,
-                                     IOpt optService,
+                                     IOtp otpService,
                                      ILogger logger,
                                      INotification notification)
         {
             _failedCounter = failedCounter;
             _profile = profile;
             _hash = hash;
-            _optService = optService;
+            _otpService = otpService;
             _logger = logger;
             _notification = notification;
         }
 
-        public AuthenticationService()
-        {
-            _failedCounter = new FailedCounter();
-            _profile = new ProfileRepo();
-            _hash = new Sha256Adapter();
-            _optService = new OptService();
-            _logger = new NlogAdapter();
-            _notification = new SlackAdapter();
-        }
+        // public AuthenticationService()
+        // {
+        //     _failedCounter = new FailedCounter();
+        //     _profile = new ProfileRepo();
+        //     _hash = new Sha256Adapter();
+        //     _optService = new OptService();
+        //     _logger = new NlogAdapter();
+        //     _notification = new SlackAdapter();
+        // }
 
         public bool Verify(string accountId, string password, string otp)
         {
@@ -45,7 +45,7 @@ namespace DependencyInjectionWorkshop.Models
 
             var hashPassword = _hash.GetHash(password);
 
-            var currentOpt = _optService.GetCurrentOpt(accountId);
+            var currentOpt = _otpService.GetCurrentOtp(accountId);
 
             if (passwordFromDB == hashPassword && otp == currentOpt)
             {

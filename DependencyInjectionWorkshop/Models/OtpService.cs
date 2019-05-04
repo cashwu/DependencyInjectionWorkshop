@@ -1,9 +1,9 @@
 using System;
 using System.Net.Http;
 
-public class OptService : IOpt
+public class OtpService : IOtp
 {
-    public string GetCurrentOpt(string accountId)
+    public string GetCurrentOtp(string accountId)
     {
         string currentOpt;
         var otpResponse = new HttpClient
