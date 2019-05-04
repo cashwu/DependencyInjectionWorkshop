@@ -14,30 +14,28 @@ namespace DependencyInjectionWorkshop.Models
     {
         public bool Verify(string accountId, string password, string otp)
         {
-            var httpClient = new HttpClient
+            CheckAccountIsLocked(accountId, new HttpClient
             {
                 BaseAddress = new Uri("http://joey.com/")
-            };
-            
-            CheckAccountIsLocked(accountId, httpClient);
+            });
 
             var passwordFromDB = GetPasswordFromDb(accountId);
 
             var hashPassword = GetHashPassword(password);
 
-            var currentOpt = GetCurrentOpt(accountId, httpClient);
+            var currentOpt = GetCurrentOpt(accountId);
 
             if (passwordFromDB == hashPassword && otp == currentOpt)
             {
-                ResetFailedCounter(accountId, httpClient);
+                ResetFailedCounter(accountId);
 
                 return true;
             }
             else
             {
-                AddFailedCounter(accountId, httpClient);
+                AddFailedCounter(accountId);
 
-                var failedCount = GetFailedCount(accountId, httpClient);
+                var failedCount = GetFailedCount(accountId);
 
                 LogFailedCount($"AccountId - {accountId}, Failed Count - {failedCount}");
 
@@ -61,31 +59,43 @@ namespace DependencyInjectionWorkshop.Models
             logger.Info(message);
         }
 
-        private static Task<int> GetFailedCount(string accountId, HttpClient httpClient)
+        private static Task<int> GetFailedCount(string accountId)
         {
-            var getFailedCountResponse = httpClient.PostAsJsonAsync("api/failedCounter/GetFailedCount", accountId).Result;
+            var getFailedCountResponse = new HttpClient
+            {
+                BaseAddress = new Uri("http://joey.com/")
+            }.PostAsJsonAsync("api/failedCounter/GetFailedCount", accountId).Result;
             getFailedCountResponse.EnsureSuccessStatusCode();
 
             var failedCount = getFailedCountResponse.Content.ReadAsAsync<int>();
             return failedCount;
         }
 
-        private static void AddFailedCounter(string accountId, HttpClient httpClient)
+        private static void AddFailedCounter(string accountId)
         {
-            var addFailedCountResponse = httpClient.PostAsJsonAsync("api/failedCounter/Add", accountId).Result;
+            var addFailedCountResponse = new HttpClient
+            {
+                BaseAddress = new Uri("http://joey.com/")
+            }.PostAsJsonAsync("api/failedCounter/Add", accountId).Result;
             addFailedCountResponse.EnsureSuccessStatusCode();
         }
 
-        private static void ResetFailedCounter(string accountId, HttpClient httpClient)
+        private static void ResetFailedCounter(string accountId)
         {
-            var resetResponse = httpClient.PostAsJsonAsync("api/failedCounter/Reset", accountId).Result;
+            var resetResponse = new HttpClient
+            {
+                BaseAddress = new Uri("http://joey.com/")
+            }.PostAsJsonAsync("api/failedCounter/Reset", accountId).Result;
             resetResponse.EnsureSuccessStatusCode();
         }
 
-        private static string GetCurrentOpt(string accountId, HttpClient httpClient)
+        private static string GetCurrentOpt(string accountId)
         {
             string currentOpt;
-            var otpResponse = httpClient.PostAsJsonAsync("api/otps", accountId).Result;
+            var otpResponse = new HttpClient
+            {
+                BaseAddress = new Uri("http://joey.com/")
+            }.PostAsJsonAsync("api/otps", accountId).Result;
             if (otpResponse.IsSuccessStatusCode)
             {
                 currentOpt = otpResponse.Content.ReadAsAsync<string>().Result;
