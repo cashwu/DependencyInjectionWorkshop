@@ -61,17 +61,51 @@ namespace DependencyInjectionWorkshopTests
         {
             GivenFailedCount(DefaultFailedCount);
             WhenInvalid();
-            
-            LogShouldContains(DefaultAccountId, DefaultFailedCount); 
+
+            LogShouldContains(DefaultAccountId, DefaultFailedCount);
         }
-        
+
         [Test]
         public void reset_failed_count_when_valid()
         {
             WhenValid();
+            ShouldResetFailedCounter();
+        }
+
+        [Test]
+        public void add_failed_when_invalid()
+        {
+            WhenInvalid();
+            ShouldAddFailedCount();
+        }
+
+        [Test]
+        public void account_is_locked()
+        {
+            WhenAccountIsLock();
+            ShouldThrowException();
+        }
+
+        private void WhenAccountIsLock()
+        {
+            _failedCounter.CheckAccountIsLocked(DefaultAccountId).ReturnsForAnyArgs(true);
+        }
+
+        private void ShouldThrowException()
+        {
+            TestDelegate action = () => _authenticationService.Verify(DefaultAccountId, DefaultPassword, DefaultOtp);
+            Assert.Throws<FailedTooManyTimeException>(action);
+        }
+
+        private void ShouldResetFailedCounter()
+        {
             _failedCounter.Received(1).Reset(Arg.Any<string>());
         }
-        
+
+        private void ShouldAddFailedCount()
+        {
+            _failedCounter.Received(1).Add(Arg.Any<string>());
+        }
 
         private void LogShouldContains(string accountId, int failedCount)
         {

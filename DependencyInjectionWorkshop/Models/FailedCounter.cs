@@ -38,7 +38,7 @@ public class FailedCounter : IFailedCounter
         return failedCount;
     }
 
-    public void CheckAccountIsLocked(string accountId)
+    public bool CheckAccountIsLocked(string accountId)
     {
         var isLockedResponse = new HttpClient
         {
@@ -46,10 +46,6 @@ public class FailedCounter : IFailedCounter
         }.PostAsJsonAsync("api/failedCounter/IsLocked", accountId).Result;
         isLockedResponse.EnsureSuccessStatusCode();
 
-        var isLock = isLockedResponse.Content.ReadAsAsync<bool>().Result;
-        if (isLock)
-        {
-            throw new FailedTooManyTimeException(accountId);
-        }
+        return isLockedResponse.Content.ReadAsAsync<bool>().Result;
     }
 }
