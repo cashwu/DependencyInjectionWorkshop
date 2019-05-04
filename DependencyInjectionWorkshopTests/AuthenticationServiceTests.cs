@@ -33,17 +33,55 @@ namespace DependencyInjectionWorkshopTests
 
             _authenticationService = new AuthenticationService(_failedCounter, _profile, _hash, _otpService, _logger, _notification);
         }
-        
+
         [Test]
         public void is_valid()
+        {
+            var isValid = WhenValid();
+            ShouldBeValid(isValid);
+        }
+
+        [Test]
+        public void is_invalid_when_wrong_otp()
+        {
+            var isValid = WhenInvalid();
+            ShouldBeInvalid(isValid);
+        }
+
+        [Test]
+        public void notify_user_when_invalid()
+        {
+            WhenInvalid();
+            ShouldNotifyUser();
+        }
+
+        private bool WhenValid()
         {
             GivenPassword(DefaultAccountId, DefaultHashPassword);
             GivenHash(DefaultPassword, DefaultHashPassword);
             GivenOtp(DefaultAccountId, DefaultOtp);
 
             var isValid = WhenVerify(DefaultAccountId, DefaultPassword, DefaultOtp);
+            return isValid;
+        }
 
-            ShouldBeValid(isValid);
+        private bool WhenInvalid()
+        {
+            GivenPassword(DefaultAccountId, DefaultHashPassword);
+            GivenHash(DefaultPassword, DefaultHashPassword);
+            GivenOtp(DefaultAccountId, DefaultOtp);
+
+            return WhenVerify(DefaultAccountId, DefaultPassword, "wrong otp");
+        }
+
+        private void ShouldNotifyUser()
+        {
+            _notification.Received(1).PushMessage(Arg.Any<string>());
+        }
+
+        private static void ShouldBeInvalid(bool isValid)
+        {
+            Assert.IsFalse(isValid);
         }
 
         private bool WhenVerify(string accountId, string password, string otp)
