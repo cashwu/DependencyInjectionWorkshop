@@ -1,7 +1,7 @@
 using System;
 using System.Net.Http;
 
-internal class OptService
+public class OptService : IOpt
 {
     public string GetCurrentOpt(string accountId)
     {

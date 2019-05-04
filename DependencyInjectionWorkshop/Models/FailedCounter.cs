@@ -4,9 +4,29 @@ using System.Threading.Tasks;
 using DependencyInjectionWorkshop.Exceptions;
 using DependencyInjectionWorkshop.Models;
 
-internal class FailedCounter
+public class FailedCounter : IFailedCounter
 {
-    public Task<int> GetFailedCount(string accountId)
+    public void Reset(string accountId)
+    {
+        var resetResponse = new HttpClient
+                {
+                    BaseAddress = new Uri("http://joey.com/")
+                }.PostAsJsonAsync("api/failedCounter/Reset", accountId)
+                 .Result;
+        resetResponse.EnsureSuccessStatusCode();
+    }
+
+    public void Add(string accountId)
+    {
+        var addFailedCountResponse = new HttpClient
+                {
+                    BaseAddress = new Uri("http://joey.com/")
+                }.PostAsJsonAsync("api/failedCounter/Add", accountId)
+                 .Result;
+        addFailedCountResponse.EnsureSuccessStatusCode();
+    }
+
+    public Task<int> Get(string accountId)
     {
         var getFailedCountResponse = new HttpClient
                 {
@@ -17,26 +37,6 @@ internal class FailedCounter
 
         var failedCount = getFailedCountResponse.Content.ReadAsAsync<int>();
         return failedCount;
-    }
-
-    public void AddFailedCounter(string accountId)
-    {
-        var addFailedCountResponse = new HttpClient
-                {
-                    BaseAddress = new Uri("http://joey.com/")
-                }.PostAsJsonAsync("api/failedCounter/Add", accountId)
-                 .Result;
-        addFailedCountResponse.EnsureSuccessStatusCode();
-    }
-
-    public void ResetFailedCounter(string accountId)
-    {
-        var resetResponse = new HttpClient
-                {
-                    BaseAddress = new Uri("http://joey.com/")
-                }.PostAsJsonAsync("api/failedCounter/Reset", accountId)
-                 .Result;
-        resetResponse.EnsureSuccessStatusCode();
     }
 
     public void CheckAccountIsLocked(string accountId)

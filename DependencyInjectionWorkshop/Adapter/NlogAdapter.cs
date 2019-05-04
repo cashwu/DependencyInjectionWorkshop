@@ -1,11 +1,21 @@
+using System;
+
 namespace DependencyInjectionWorkshop.Adapter
 {
-    internal class NlogAdapter
+    public class NlogAdapter : ILogger
     {
-        public void LogFailedCount(string message)
+        public virtual void Info(string message)
         {
             var logger = NLog.LogManager.GetCurrentClassLogger();
             logger.Info(message);
+        }
+    }
+    
+    public class ConsoleAdapter : ILogger
+    {
+        public void Info(string message)
+        {
+            Console.WriteLine(message); 
         }
     }
 }

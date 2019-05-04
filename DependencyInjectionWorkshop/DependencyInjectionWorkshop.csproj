@@ -75,10 +75,15 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Adapter\IHash.cs" />
+    <Compile Include="Adapter\ILogger.cs" />
+    <Compile Include="Adapter\INotification.cs" />
     <Compile Include="Adapter\NlogAdapter.cs" />
     <Compile Include="Models\AuthenticationService.cs" />
     <Compile Include="Models\FailedCounter.cs" />
     <Compile Include="Models\FailedTooManyTimeException.cs" />
+    <Compile Include="Models\IFailedCounter.cs" />
+    <Compile Include="Models\IOpt.cs" />
     <Compile Include="Models\OptService.cs" />
     <Compile Include="Models\ProfileRepo.cs" />
     <Compile Include="Models\Sha256Adapter.cs" />

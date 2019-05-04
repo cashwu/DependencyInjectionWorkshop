@@ -2,13 +2,13 @@ using System.Text;
 
 namespace DependencyInjectionWorkshop.Adapter
 {
-    internal class Sha256Adapter
+    public class Sha256Adapter : IHash
     {
-        public string GetHashPassword(string password)
+        public string GetHash(string plainText)
         {
             var crypt = new System.Security.Cryptography.SHA256Managed();
             var hash = new StringBuilder();
-            var crypto = crypt.ComputeHash(Encoding.UTF8.GetBytes(password));
+            var crypto = crypt.ComputeHash(Encoding.UTF8.GetBytes(plainText));
             foreach (var theByte in crypto)
             {
                 hash.Append(theByte.ToString("x2"));
