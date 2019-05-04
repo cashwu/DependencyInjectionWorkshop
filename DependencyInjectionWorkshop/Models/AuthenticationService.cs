@@ -13,10 +13,23 @@ namespace DependencyInjectionWorkshop.Models
     {
         public bool Verify(string accountId, string password, string otp)
         {
-            string dbPassword;
+            var httpClient = new HttpClient
+            {
+                BaseAddress = new Uri("http://joey.com/")
+            };
+            var isLockedResponse = httpClient.PostAsJsonAsync("api/failedCounter/IsLocked", accountId).Result;
+            isLockedResponse.EnsureSuccessStatusCode();
+
+            var isLock = isLockedResponse.Content.ReadAsAsync<bool>().Result;
+            if (isLock)
+            {
+                throw new FailedTooManyTimeException(accountId);
+            }
+            
+            string passwordFromDB;
             using (var connection = new SqlConnection("my connection string"))
             {
-                dbPassword = connection.Query<string>("spGetUserPassword", new
+                passwordFromDB = connection.Query<string>("spGetUserPassword", new
                                        {
                                            Id = accountId
                                        }, commandType: CommandType.StoredProcedure)
@@ -34,21 +47,17 @@ namespace DependencyInjectionWorkshop.Models
             var hashPassword = hash.ToString();
 
             string currentOpt;
-            var httpClient = new HttpClient
+            var otpResponse = httpClient.PostAsJsonAsync("api/otps", accountId).Result;
+            if (otpResponse.IsSuccessStatusCode)
             {
-                BaseAddress = new Uri("http://joey.com/")
-            };
-            var response = httpClient.PostAsJsonAsync("api/otps", accountId).Result;
-            if (response.IsSuccessStatusCode)
-            {
-                currentOpt = response.Content.ReadAsAsync<string>().Result;
+                currentOpt = otpResponse.Content.ReadAsAsync<string>().Result;
             }
             else
             {
                 throw new Exception($"web api error, accountId:{accountId}");
             }
 
-            if (dbPassword == hashPassword && otp == currentOpt)
+            if (passwordFromDB == hashPassword && otp == currentOpt)
             {
                 var resetResponse = httpClient.PostAsJsonAsync("api/failedCounter/Reset", accountId).Result;
                 resetResponse.EnsureSuccessStatusCode();
@@ -60,13 +69,22 @@ namespace DependencyInjectionWorkshop.Models
                 var addFailedCountResponse = httpClient.PostAsJsonAsync("api/failedCounter/Add", accountId).Result;
                 addFailedCountResponse.EnsureSuccessStatusCode();
 
+                string message = $"{accountId} failed";
                 var slackClient = new SlackClient("my api token");
                 slackClient.PostMessage(repo =>
                 {
-                }, "my channel", "my message", "my bot name");
+                }, "my channel", message, "my bot name");
 
                 return false;
             }
+        }
+    }
+
+    public class FailedTooManyTimeException : Exception
+    {
+        public FailedTooManyTimeException(string accountId)
+        {
+            
         }
     }
 }
