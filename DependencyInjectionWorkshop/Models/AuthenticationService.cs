@@ -50,10 +50,16 @@ namespace DependencyInjectionWorkshop.Models
 
             if (dbPassword == hashPassword && otp == currentOpt)
             {
+                var resetResponse = httpClient.PostAsJsonAsync("api/failedCounter/Reset", accountId).Result;
+                resetResponse.EnsureSuccessStatusCode();
+
                 return true;
             }
             else
             {
+                var addFailedCountResponse = httpClient.PostAsJsonAsync("api/failedCounter/Add", accountId).Result;
+                addFailedCountResponse.EnsureSuccessStatusCode();
+
                 var slackClient = new SlackClient("my api token");
                 slackClient.PostMessage(repo =>
                 {
