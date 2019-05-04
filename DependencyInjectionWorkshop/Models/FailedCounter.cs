@@ -25,7 +25,7 @@ public class FailedCounter : IFailedCounter
         addFailedCountResponse.EnsureSuccessStatusCode();
     }
 
-    public Task<int> Get(string accountId)
+    public int Get(string accountId)
     {
         var getFailedCountResponse = new HttpClient
                 {
@@ -34,7 +34,7 @@ public class FailedCounter : IFailedCounter
                  .Result;
         getFailedCountResponse.EnsureSuccessStatusCode();
 
-        var failedCount = getFailedCountResponse.Content.ReadAsAsync<int>();
+        var failedCount = getFailedCountResponse.Content.ReadAsAsync<int>().Result;
         return failedCount;
     }
 
