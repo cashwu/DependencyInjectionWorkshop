@@ -20,7 +20,7 @@ namespace DependencyInjectionWorkshopTests
         private INotification _notification;
         private IFailedCounter _failedCounter;
         private ILogger _logger;
-        private AuthenticationService _authenticationService;
+        private IAuthenticationService _authentication;
 
         [SetUp]
         public void Setup()
@@ -32,7 +32,9 @@ namespace DependencyInjectionWorkshopTests
             _failedCounter = Substitute.For<IFailedCounter>();
             _logger = Substitute.For<ILogger>();
 
-            _authenticationService = new AuthenticationService(_failedCounter, _profile, _hash, _otpService, _logger, _notification);
+            var authenticationService = new AuthenticationService(_failedCounter, _profile, _hash, _otpService, _logger);
+            _authentication = new NotificationDecorator(authenticationService, _notification);
+            
         }
 
         [Test]
@@ -93,7 +95,7 @@ namespace DependencyInjectionWorkshopTests
 
         private void ShouldThrowException()
         {
-            TestDelegate action = () => _authenticationService.Verify(DefaultAccountId, DefaultPassword, DefaultOtp);
+            TestDelegate action = () => _authentication.Verify(DefaultAccountId, DefaultPassword, DefaultOtp);
             Assert.Throws<FailedTooManyTimeException>(action);
         }
 
@@ -148,7 +150,7 @@ namespace DependencyInjectionWorkshopTests
 
         private bool WhenVerify(string accountId, string password, string otp)
         {
-            return _authenticationService.Verify(accountId, password, otp);
+            return _authentication.Verify(accountId, password, otp);
         }
 
         private void ShouldBeValid(bool isValid)

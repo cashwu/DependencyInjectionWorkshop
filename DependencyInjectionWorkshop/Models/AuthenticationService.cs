@@ -3,39 +3,31 @@ using DependencyInjectionWorkshop.Repository;
 
 namespace DependencyInjectionWorkshop.Models
 {
-    public class AuthenticationService
+    public interface IAuthenticationService
+    {
+        bool Verify(string accountId, string password, string otp);
+    }
+
+    public class AuthenticationService : IAuthenticationService
     {
         private readonly IFailedCounter _failedCounter;
         private readonly IProfile _profile;
         private readonly IHash _hash;
         private readonly IOtp _otpService;
         private readonly ILogger _logger;
-        private readonly INotification _notification;
 
         public AuthenticationService(IFailedCounter failedCounter,
                                      IProfile profile,
                                      IHash hash,
                                      IOtp otpService,
-                                     ILogger logger,
-                                     INotification notification)
+                                     ILogger logger)
         {
             _failedCounter = failedCounter;
             _profile = profile;
             _hash = hash;
             _otpService = otpService;
             _logger = logger;
-            _notification = notification;
         }
-
-        // public AuthenticationService()
-        // {
-        //     _failedCounter = new FailedCounter();
-        //     _profile = new ProfileRepo();
-        //     _hash = new Sha256Adapter();
-        //     _optService = new OptService();
-        //     _logger = new NlogAdapter();
-        //     _notification = new SlackAdapter();
-        // }
 
         public bool Verify(string accountId, string password, string otp)
         {
@@ -64,9 +56,7 @@ namespace DependencyInjectionWorkshop.Models
 
                 _logger.Info($"AccountId - {accountId}, Failed Count - {failedCount}");
 
-                _notification.PushMessage($"AccountId - {accountId} verify failed");
-
-                return false;
+               return false;
             }
         }
     }
